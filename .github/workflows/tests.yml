@@ -1,52 +1,30 @@
-name: Calculator Tests
+Test_Car:
+  runs-on: ubuntu-latest
+  needs: Compilation
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    - name: Run test "car" and capture report
+      run: |
+        cd build
+        echo '== Test car 5 ==' > report_car.txt
+        ./calculator car 5 > output_car.txt
+        exit_code=$?
+        cat output_car.txt >> report_car.txt
+        echo "" >> report_car.txt
+        echo "Exit code: $exit_code" >> report_car.txt
 
-jobs:
-  Compilation:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Upload report as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-car-report
+        path: build/report_car.txt
 
-      - name: Build project
-        run: |
-          mkdir -p build
-          cd build
-          cmake ..
-          make
-
-  Test_Add:
-    runs-on: ubuntu-latest
-    needs: Compilation
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Run test "add" and capture report
-        run: |
-          cd build
-          echo '== Test add 10 5 ==' > report.txt
-          ./calculator add 10 5 > output.txt
-          exit_code=$?
-          cat output.txt >> report.txt
-          echo "" >> report.txt
-          echo "Exit code: $exit_code" >> report.txt
-
-      - name: Upload report as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-add-report
-          path: build/report.txt
-
-      - name: Job summary
-        run: |
-          echo '### Résultat du test add' >> $GITHUB_STEP_SUMMARY
-          echo '' >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat build/report.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+    - name: Job summary
+      run: |
+        echo '### Résultat du test car' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        cat build/report_car.txt >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
